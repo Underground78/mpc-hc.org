@@ -2,17 +2,7 @@
 
 module.exports = function(grunt) {
 
-    var crypto = require("crypto");
-    var currentDate = (new Date()).valueOf().toString();
-    var random = Math.random().toString();
-    var id = crypto.createHash("sha1").update(currentDate + random).digest("hex");
-    var globalConfig = {
-        id: id
-    };
-
-    // Project configuration.
     grunt.initConfig({
-        globalConfig: globalConfig,
 
         // Copy files that don't need compilation to dist/
         copy: {
@@ -44,46 +34,35 @@ module.exports = function(grunt) {
             }
         },
 
-        includereplace: {
-            dist: {
-                options: {
-                    globals: {
-                        HASH: id
-                    }
-                },
-                files: [
-                    {src: "**/*.html", dest: "_site/", expand: true, cwd: "_site/"}
-                ]
+        rev: {
+            assets: {
+                files: {
+                    src: [
+                        "_site/assets/css/**/{,*/}*.css",
+                        "_site/assets/js/**/{,*/}*.js",
+                        //"_site/assets/img/**/*.{jpg,jpeg,gif,png}",
+                        "_site/assets/fonts/**/*.{eot,svg,ttf,woff}"
+                    ]
+                }
             }
         },
 
-        jshint: {
+        useminPrepare: {
+            html: "_site/index.html"
+        },
+
+        usemin: {
+            html: ["_site/**/*.html"],
             options: {
-                jshintrc: ".jshintrc"
-            },
-            files: {
-                src: ["Gruntfile.js", "source/assets/js/plugins.js"]
+                dirs: ["_site/assets"]
             }
-        },
-
-        csslint: {
-            src: ["source/assets/css/style.css"]
         },
 
         cssmin: {
-            minify: {
-                options: {
-                    keepSpecialComments: 0,
-                    report: "min",
-                    selectorsMergeMode: "ie8"
-                },
-                files: {
-                    "_site/assets/css/pack-<%= globalConfig.id %>.css": ["source/assets/css/bootstrap.css",
-                                                                         "source/assets/css/font-awesome.css",
-                                                                         "source/assets/css/jquery.fancybox.css",
-                                                                         "source/assets/css/jquery.fancybox-thumbs.css",
-                                                                         "source/assets/css/style.css"]
-                }
+            options: {
+                keepSpecialComments: 0,
+                report: "min",
+                selectorsMergeMode: "ie8"
             }
         },
 
@@ -94,20 +73,22 @@ module.exports = function(grunt) {
                 preserveComments: false,
                 report: "min"
             },
-            minify: {
-                files: {
-                    "_site/assets/js/pack-<%= globalConfig.id %>.js": ["source/assets/js/plugins.js",
-                                                                       "source/assets/js/bootstrap.js",
-                                                                       "source/assets/js/jquery.mousewheel.js",
-                                                                       "source/assets/js/jquery.fancybox.js",
-                                                                       "source/assets/js/jquery.fancybox-thumbs.js"]
-                }
+            ie: {
+                src: ["source/assets/js/html5shiv.js", "source/assets/js/respond.js"],
+                dest: "_site/assets/js/ie.js"
+            }
+        },
+
+        csslint: {
+            src: ["source/assets/css/style.css"]
+        },
+
+        jshint: {
+            options: {
+                jshintrc: ".jshintrc"
             },
-            minifyIE: {
-                files: {
-                    "_site/assets/js/html5shiv-respond.min.js": ["source/assets/js/html5shiv.js",
-                                                                 "source/assets/js/respond.js"]
-                }
+            files: {
+                src: ["Gruntfile.js", "source/assets/js/plugins.js"]
             }
         },
 
@@ -131,7 +112,19 @@ module.exports = function(grunt) {
     // Load any grunt plugins found in package.json.
     require("load-grunt-tasks")(grunt, {scope: "devDependencies"});
 
-    grunt.registerTask("build", ["jekyll", "copy", "includereplace", "cssmin", "uglify"]);
+    grunt.registerTask("build", [
+        "clean",
+        "jekyll",
+        "useminPrepare",
+        "concat",
+        "copy",
+        "cssmin",
+        "uglify",
+        "uglify:ie",
+        "rev",
+        "usemin"
+    ]);
+
     grunt.registerTask("default", ["build", "connect", "watch"]);
     grunt.registerTask("test", ["build", "csslint", "jshint", "validation"]);
 
