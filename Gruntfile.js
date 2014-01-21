@@ -1,3 +1,4 @@
+/* jshint camelcase: false */
 "use strict";
 
 module.exports = function(grunt) {
@@ -13,12 +14,14 @@ module.exports = function(grunt) {
     // Project configuration.
     grunt.initConfig({
         globalConfig: globalConfig,
+        dest: "_site",
+        src: "source",
 
         // Copy files that don't need compilation to dist/
         copy: {
             dist: {
                 files: [
-                    {dest: "_site/", src: "assets/js/jquery*.min.js", expand: true, cwd: "source/"},
+                    {dest: "<%= dest %>/", src: "assets/js/jquery*.min.js", expand: true, cwd: "<%= src %>/"},
                 ]
             }
         },
@@ -30,15 +33,15 @@ module.exports = function(grunt) {
         connect: {
             server: {
                 options: {
-                    base: "_site/",
+                    base: "<%= dest %>/",
                     port: 8000
                 }
             }
         },
 
         watch: {
-            files: ["source/**/*", ".jshintrc", "_config.yml", "Gruntfile.js"],
-            tasks: ["build"],
+            files: ["<%= src %>/**/*", ".jshintrc", "_config.yml", "Gruntfile.js"],
+            tasks: "build",
             options: {
                 livereload: true
             }
@@ -52,7 +55,7 @@ module.exports = function(grunt) {
                     }
                 },
                 files: [
-                    {src: "**/*.html", dest: "_site/", expand: true, cwd: "_site/"}
+                    {src: "**/*.html", dest: "<%= dest %>/", expand: true, cwd: "<%= dest %>/"}
                 ]
             }
         },
@@ -62,13 +65,25 @@ module.exports = function(grunt) {
                 jshintrc: ".jshintrc"
             },
             files: {
-                src: ["Gruntfile.js", "source/assets/js/plugins.js"]
+                src: ["Gruntfile.js", "<%= src %>/assets/js/plugins.js"]
             }
         },
 
         csslint: {
-            src: ["source/assets/css/style.css"]
+            src: "<%= src %>/assets/css/style.css"
         },
+
+        concat_css: {
+            dist: {
+                src: ["<%= src %>/assets/css/bootstrap.css",
+                      "<%= src %>/assets/css/font-awesome.css",
+                      "<%= src %>/assets/css/jquery.fancybox.css",
+                      "<%= src %>/assets/css/jquery.fancybox-thumbs.css",
+                      "<%= src %>/assets/css/style.css"],
+                dest: "<%= dest %>/assets/css/pack.css"
+            }
+        },
+
 
         cssmin: {
             minify: {
@@ -78,11 +93,7 @@ module.exports = function(grunt) {
                     selectorsMergeMode: "ie8"
                 },
                 files: {
-                    "_site/assets/css/pack-<%= globalConfig.id %>.css": ["source/assets/css/bootstrap.css",
-                                                                         "source/assets/css/font-awesome.css",
-                                                                         "source/assets/css/jquery.fancybox.css",
-                                                                         "source/assets/css/jquery.fancybox-thumbs.css",
-                                                                         "source/assets/css/style.css"]
+                    "<%= dest %>/assets/css/pack-<%= globalConfig.id %>.css": "<%= uncss.dist.dest %>"
                 }
             }
         },
@@ -96,29 +107,29 @@ module.exports = function(grunt) {
             },
             minify: {
                 files: {
-                    "_site/assets/js/pack-<%= globalConfig.id %>.js": ["source/assets/js/plugins.js",
-                                                                       "source/assets/js/bootstrap.js",
-                                                                       "source/assets/js/jquery.mousewheel.js",
-                                                                       "source/assets/js/jquery.fancybox.js",
-                                                                       "source/assets/js/jquery.fancybox-thumbs.js"]
+                    "<%= dest %>/assets/js/pack-<%= globalConfig.id %>.js": ["<%= src %>/assets/js/plugins.js",
+                                                                             "<%= src %>/assets/js/bootstrap.js",
+                                                                             "<%= src %>/assets/js/jquery.mousewheel.js",
+                                                                             "<%= src %>/assets/js/jquery.fancybox.js",
+                                                                             "<%= src %>/assets/js/jquery.fancybox-thumbs.js"]
                 }
             },
             minifyIE: {
                 files: {
-                    "_site/assets/js/html5shiv-respond.min.js": ["source/assets/js/html5shiv.js",
-                                                                 "source/assets/js/respond.js"]
+                    "<%= dest %>/assets/js/html5shiv-respond.min.js": ["<%= src %>/assets/js/html5shiv.js",
+                                                                       "<%= src %>/assets/js/respond.js"]
                 }
             }
         },
 
         uncss: {
-            dist: {
-                files: {
-                    "_site/assets/css/tidy.css": ["_site/**/*.html"]
-                }
-            },
             options: {
-                stylesheets: ["_site/assets/css/pack-<%= globalConfig.id %>.css"]
+                //stylesheets: "<%= concat_css.dist.dest %>"
+                csspath: "<%= dest %>/assets/css/"
+            },
+            dist: {
+                src: "<%= dest %>/**/*.html",
+                dest: "<%= dest %>/assets/css/tidy.css"
             }
         },
 
@@ -129,12 +140,12 @@ module.exports = function(grunt) {
                 reset: true
             },
             files: {
-                src: ["_site/**/*.html"]
+                src: "<%= dest %>/**/*.html"
             }
         },
 
         clean: {
-            dist: "_site/"
+            dist: "<%= dest %>/"
         }
 
     });
@@ -142,7 +153,7 @@ module.exports = function(grunt) {
     // Load any grunt plugins found in package.json.
     require("load-grunt-tasks")(grunt, {scope: "devDependencies"});
 
-    grunt.registerTask("build", ["jekyll", "copy", "includereplace", "cssmin", "uncss", "uglify"]);
+    grunt.registerTask("build", ["jekyll", "copy", "includereplace", "concat_css", "uncss", "cssmin", "uglify"]);
     grunt.registerTask("default", ["build", "connect", "watch"]);
     grunt.registerTask("test", ["build", "csslint", "jshint", "validation"]);
 
