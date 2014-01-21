@@ -111,6 +111,17 @@ module.exports = function(grunt) {
             }
         },
 
+        uncss: {
+            dist: {
+                files: {
+                    "_site/assets/css/tidy.css": ["_site/**/*.html"]
+                }
+            },
+            options: {
+                stylesheets: ["_site/assets/css/pack-<%= globalConfig.id %>.css"]
+            }
+        },
+
         validation: {
             options: {
                 charset: "utf-8",
@@ -131,7 +142,7 @@ module.exports = function(grunt) {
     // Load any grunt plugins found in package.json.
     require("load-grunt-tasks")(grunt, {scope: "devDependencies"});
 
-    grunt.registerTask("build", ["jekyll", "copy", "includereplace", "cssmin", "uglify"]);
+    grunt.registerTask("build", ["jekyll", "copy", "includereplace", "cssmin", "uncss", "uglify"]);
     grunt.registerTask("default", ["build", "connect", "watch"]);
     grunt.registerTask("test", ["build", "csslint", "jshint", "validation"]);
 
