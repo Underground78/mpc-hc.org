@@ -2,4 +2,13 @@
 
 {{ content }}
 
+<div data-alert-id="editPageOnGithub" class="alert alert-warning alert-dismissible text-center" role="alert">
+    <button type="button" class="close" data-dismiss="alert">
+        <span aria-hidden="true">&times;</span>
+        <span class="sr-only">Close</span>
+    </button>
+    <h4><span class="fa fa-exclamation-circle" aria-hidden="true"></span> Warning</h4>
+    <p>Found a typo? Want to add more content? You can edit this page on <a href="{{site.github_repo}}/{{page.path | replace:'\\', '/'}}" class="alert-link" target="_blank">GitHub</a> and send a Pull Request.</p>
+</div>
+
 {% include footer.html %}
