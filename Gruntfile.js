@@ -33,7 +33,9 @@ module.exports = function(grunt) {
                     minifyCSS: true,
                     minifyJS: true,
                     removeAttributeQuotes: true,
-                    removeComments: true
+                    removeComments: true,
+                    removeScriptTypeAttributes: true,
+                    removeStyleLinkTypeAttributes: true
                 },
                 expand: true,
                 cwd: "<%= dirs.dest %>",
@@ -75,6 +77,19 @@ module.exports = function(grunt) {
                 src: ["<%= dirs.src %>/assets/js/html5shiv.js",
                       "<%= dirs.src %>/assets/js/respond.js"],
                 dest: "<%= dirs.dest %>/assets/js/html5shiv-respond.min.js"
+            }
+        },
+
+        critical: {
+            dist: {
+                options: {
+                    //base: "./",
+                    css: ["<%= concat.css.dest %>"],
+                    width: 640,
+                    height: 480
+                },
+                src: "<%= dirs.dest %>/index.html",
+                dest: "<%= dirs.dest %>/index.html"
             }
         },
 
@@ -167,6 +182,11 @@ module.exports = function(grunt) {
         usemin: {
             css: "<%= dirs.dest %>/assets/css/pack*.css",
             html: "<%= dirs.dest %>/**/*.html",
+            patterns: {
+              html: [
+                [/loadCSS\(['"]([^"']+)['"]\)/gm, "Replacing reference to CSS within loadCSS"]
+              ]
+            },
             options: {
                 assetsDirs: ["<%= dirs.dest %>/", "<%= dirs.dest %>/assets/img/"]
             }
@@ -252,6 +272,7 @@ module.exports = function(grunt) {
         "copy",
         "concat",
         "uncss",
+        "critical",
         "cssmin",
         "uglify",
         "filerev",
