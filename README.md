@@ -7,6 +7,6 @@
 * Install [Node.js](http://nodejs.org/download/)
 * Install grunt: `npm install -g grunt-cli`
 * Install the Node.js dependencies via npm: `npm install`
-* Install RailsInstaller with Ruby 1.9.3 <http://railsinstaller.org/en>
+* Install RubyInstaller with Ruby <http://rubyinstaller.org/> (1.9.3 - 2.1.x)
 * Run `gem install bundle` and then `bundle install`
 * Run `grunt build` to build the static site, `grunt` to build and watch for changes (http://localhost:8000/)
