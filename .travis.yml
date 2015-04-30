@@ -7,9 +7,14 @@ node_js:
   - "0.12"
 
 before_install:
-  - rvm use 1.9.3
+  - rvm use 1.9.3 --fuzzy
 
 install:
   - travis_retry npm install -g grunt-cli
   - travis_retry npm install
-  - travis_retry bundle install
+  - travis_retry bundle install --without development --deployment --jobs=3
+
+cache:
+  directories:
+    - vendor/bundle
+    - node_modules
